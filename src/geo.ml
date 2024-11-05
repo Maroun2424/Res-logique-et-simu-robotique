@@ -9,24 +9,32 @@ type point = coord2D
 type vector = coord2D
 type angle = float
 
+(* Image du point p par la translation de vecteur v *)
 let translate (v : vector) (p : point) : point =
-  failwith "À compléter"
+  { x = v.x +. p.x; y = v.y +. p.y }
 
+(* Convertir un angle de degrés en radians *)
 let rad_of_deg (a : angle) : angle =
-  failwith "À compléter"
+  a *. Float.pi /. 180.0
 
+(* Convertir un angle de radians en degrés *)
 let deg_of_rad (a : angle) : angle =
-  failwith "À compléter"
+  a *. 180.0 /. Float.pi
 
+(* Image du point p par la rotation d'angle alpha et de centre c *)
 let rotate (c : point) (alpha : angle) (p : point) : point =
-  failwith "À compléter"
+  let theta = rad_of_deg alpha in
+  { x = c.x +. (p.x -. c.x )*. Float.cos theta -. (p.y -. c.y)*. Float.sin theta ;
+    y = c.y +. (p.x -. c.x )*. Float.sin theta +. (p.y -. c.y)*. Float.cos theta }
   
 type transformation =
   Translate of vector
 | Rotate of point * angle
 
 let transform (t : transformation) (p : point) : point =
-  failwith "À compléter"
+  match t with
+  | Translate v -> translate v p
+  | Rotate (c, alpha) -> rotate c alpha p
 
 type rectangle = {
     x_min : float;
