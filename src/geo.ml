@@ -44,10 +44,18 @@ type rectangle = {
   }
 
 let in_rectangle (r : rectangle) (p : point) : bool =
-  failwith "À compléter"
+  p.x >= r.x_min && p.x <= r.x_max && p.y >= r.y_min && p.y <= r.y_max
 
 let corners (r :rectangle) : point list =
-  failwith "À compléter"
-  
+  [
+    {x = r.x_min; y = r.y_max};
+    {x = r.x_max; y = r.y_max};
+    {x = r.x_max; y = r.y_min};
+    {x = r.x_min; y = r.y_min};
+  ]  
 let rectangle_of_list (pl : point list) : rectangle = 
-  failwith "À compléter"
+  let x_min = List.fold_left (fun acc p -> min acc p.x) Float.infinity pl in
+  let x_max = List.fold_left (fun acc p -> max acc p.x) Float.neg_infinity pl in
+  let y_min = List.fold_left (fun acc p -> min acc p.y) Float.infinity pl in
+  let y_max = List.fold_left (fun acc p -> max acc p.y) Float.neg_infinity pl in
+  {x_min; x_max; y_min; y_max}
