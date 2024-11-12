@@ -52,7 +52,7 @@ let corners (r :rectangle) : point list =
     {x = r.x_max; y = r.y_max};
     {x = r.x_max; y = r.y_min};
     {x = r.x_min; y = r.y_min};
-  ]  
+  ]
 let rectangle_of_list (pl : point list) : rectangle = 
   let x_min = List.fold_left (fun acc p -> min acc p.x) Float.infinity pl in
   let x_max = List.fold_left (fun acc p -> max acc p.x) Float.neg_infinity pl in
