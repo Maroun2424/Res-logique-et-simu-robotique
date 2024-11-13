@@ -49,8 +49,11 @@ let rec run_det (prog : program) (p : point) : point list =
   | Either _ :: _ -> failwith "Programme Non déterministe"
   
 let target_reached_det (prog : program) (p : point) (target : rectangle) : bool =
-  failwith "À compléter"
-  
+  let positions_visitees = run_det prog p in (* On génère toutes les positions visitées par le robot *)
+  match List.rev positions_visitees with (* On inverse la liste pour obtenir le dernier élément, qui est la position finale en tête de liste ; O(n)*)
+    | [] -> false
+    | derniere_pos :: _ -> in_rectangle target derniere_pos (* Vérifier si la dernière position est à l'intérieure du rectangle cible *)
+
 let run (prog : program) (p : point) : point list =
   failwith "À compléter"
 
