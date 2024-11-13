@@ -29,9 +29,25 @@ let rec unfold_repeat (prog : program) : program =
       | Either _ -> failwith "Porgramme Non déterministe" (* TODO: se renseigner entre failwith ou raise *)
     ) prog)
 
-let run_det (prog : program) (p : point) : point list =
-  failwith "À compléter"
-
+let rec run_det (prog : program) (p : point) : point list =
+  (* On génère la liste de toutes les positions visitées par le robot pendant l'exécution *)
+  (* On peut utiliser unfold_repeat mais celà applatit le programme ce qui baisse l'efficacité dans le cas de long program *)
+  match prog with
+  | [] -> [p]  (* Cas de base : On retourne le point de départ comme seule position visitée *)
+  | Move t :: reste ->  
+      let nouveau_point = transform t p in (*  On applique la transformation `t` au point courant `p` pour obtenir une nouvelle position *)
+      p :: run_det reste nouveau_point  (* On ajoute le `nouveau_point` à la liste des positions visitées *)
+  | Repeat (n, sousProg) :: reste ->
+    (*  On déplie le Repeat avec la fonction auxiliaire repeat qui crée une liste contenant n copies du sousProg
+        prog_deplie est exécuté en continuant avec le reste du programme `reste` *)
+      let rec repeat extractedList nb =
+        if nb = 0 then extractedList   (*  On retourne toutes les répétitions de `sousProg` *)
+        else repeat (extractedList @ sousProg) (nb - 1)
+      in
+      let prog_deplie = repeat [] n in (* programme déplié sans Repeat *)
+      run_det (prog_deplie @ reste) p  (* Exécuter le programme déplié puis le reste *)
+  | Either _ :: _ -> failwith "Programme Non déterministe"
+  
 let target_reached_det (prog : program) (p : point) (target : rectangle) : bool =
   failwith "À compléter"
   
