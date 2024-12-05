@@ -20,14 +20,17 @@ let rec is_deterministic (prog : program) : bool =
 let rec unfold_repeat (prog : program) : program =
   (* RQ : je n'ai pas utilisé is_deterministic car elle ajoute un parcours complet du program *)
   List.flatten (List.map (fun instr -> match instr with (* On applatit la liste de listes d'instructions et on applique le pattern matching aux éléments *)
-      | Move _ -> [instr]  (* On garde l'instruction Move dans le nouveau prog *)
-      | Repeat (n , sousProg) ->
-          let rec repeat extractedList nb =  (* On ajoute les instructions dépliées du sousProg à extractedList en répétant nb fois*)
-              if nb = 0  then extractedList
-                            else repeat (extractedList @ unfold_repeat sousProg) (nb - 1)
-          in repeat [] n
-      | Either _ -> failwith "Porgramme Non déterministe" (* TODO: se renseigner entre failwith ou raise *)
-    ) prog)
+    | Move _ -> [instr]  (* On garde l'instruction Move dans le nouveau prog *)
+    | Repeat (n , sousProg) ->
+        let rec repeat extractedList nb =  (* On ajoute les instructions dépliées du sousProg à extractedList en répétant nb fois*)
+            if nb = 0  then extractedList
+            else repeat (extractedList @ unfold_repeat sousProg) (nb - 1)
+        in repeat [] n
+    | Either (prog1, prog2) ->
+        let unfold1 = unfold_repeat prog1 in
+        let unfold2 = unfold_repeat prog2 in
+        unfold1 @ unfold2  (* On combine toutes les possibilités des deux branches *)
+  ) prog)
 
 let rec run_det (prog : program) (p : point) : point list =
   (* On génère la liste de toutes les positions visitées par le robot pendant l'exécution *)
