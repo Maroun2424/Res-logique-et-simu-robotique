@@ -16,6 +16,10 @@ test :
 test-% : phony
 	@ $(opam_exec) dune exec test/test.exe -- test $*
 
+.PHONY : test-geo
+test-geo :
+	@ $(opam_exec) dune exec test/test_geo.exe
+	
 .PHONY : top
 top :
 	@ $(opam_exec) dune utop . -- -init top.ml
