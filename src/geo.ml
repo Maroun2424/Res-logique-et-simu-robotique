@@ -43,9 +43,11 @@ type rectangle = {
     y_max : float
   }
 
+(* Détermine si un point p est à l'intérieur d'un rectangle r (au sens large)  *)
 let in_rectangle (r : rectangle) (p : point) : bool =
   p.x >= r.x_min && p.x <= r.x_max && p.y >= r.y_min && p.y <= r.y_max
 
+(* Renvoie la liste des quatre sommets du rectangle r *)
 let corners (r :rectangle) : point list =
   [
     {x = r.x_min; y = r.y_max};
@@ -53,6 +55,8 @@ let corners (r :rectangle) : point list =
     {x = r.x_max; y = r.y_min};
     {x = r.x_min; y = r.y_min};
   ]
+
+(* Renvoie le plus petit rectangle contenant tous les points de la liste *)
 let rectangle_of_list (pl : point list) : rectangle = 
   let x_min = List.fold_left (fun acc p -> min acc p.x) Float.infinity pl in
   let x_max = List.fold_left (fun acc p -> max acc p.x) Float.neg_infinity pl in
