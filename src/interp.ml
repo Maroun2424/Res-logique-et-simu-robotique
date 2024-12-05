@@ -57,8 +57,26 @@ let target_reached_det (prog : program) (p : point) (target : rectangle) : bool 
     | [] -> false
     | derniere_pos :: _ -> in_rectangle target derniere_pos (* Vérifier si la dernière position est à l'intérieure du rectangle cible *)
 
-let run (prog : program) (p : point) : point list =
-  failwith "À compléter"
+
+(* simule l'exécution d'un programme quelconque à partir d'un point de départ donné *)
+let rec run (prog : program) (p : point) : point list =
+  match prog with
+    | [] -> [p]  (* Cas de base : On retourne le point de départ comme seule position visitée *)
+    | Move t :: reste ->  
+        let nouveau_point = transform t p in (*  On applique la transformation `t` au point courant `p` pour obtenir une nouvelle position *)
+        p :: run reste nouveau_point  (* On ajoute le `nouveau_point` à la liste des positions visitées *)
+    | Repeat (n, sousProg) :: reste ->
+        (* On déplie la boucle Repeat pour exécuter le sous-programme `n` fois *)
+        let rec repeat extractedList nb =
+          if nb = 0 then extractedList   (*  On retourne toutes les répétitions de `sousProg` *)
+          else repeat (extractedList @ sousProg) (nb - 1)
+        in
+        let prog_deplie = repeat [] n in (* programme déplié sans Repeat *)
+        run (prog_deplie @ reste) p      (* Exécuter le programme déplié puis le reste *)
+    | Either (prog1, prog2) :: reste ->
+        (* On choisit aléatoirement l'une des branches avec Random.bool *)
+        let choix= if  Random.bool ()  then prog1 else prog2  in
+        run (choix @ reste) p  (* Exécuter le programme choisi puis le reste *)
 
 let all_choices (prog : program) : program list =
   failwith "À compléter"
