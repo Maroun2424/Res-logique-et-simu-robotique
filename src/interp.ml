@@ -58,6 +58,8 @@ let target_reached_det (prog : program) (p : point) (target : rectangle) : bool 
     | derniere_pos :: _ -> in_rectangle target derniere_pos (* Vérifier si la dernière position est à l'intérieure du rectangle cible *)
 
 
+(*TODO : Trouver un moyen d'enlver le code redondant*)
+
 (* simule l'exécution d'un programme quelconque à partir d'un point de départ donné *)
 let rec run (prog : program) (p : point) : point list =
   match prog with
@@ -78,8 +80,37 @@ let rec run (prog : program) (p : point) : point list =
         let choix= if  Random.bool ()  then prog1 else prog2  in
         run (choix @ reste) p  (* Exécuter le programme choisi puis le reste *)
 
-let all_choices (prog : program) : program list =
-  failwith "À compléter"
+(*TODO : Trouver un moyen d'enlver le code redondant*)
+
+let rec all_choices (prog : program) : program list =
+  match prog with
+    | [] -> [[]]  (* Cas de base : un programme vide a une seule version déterministe, lui-même *)
+    | Move t :: reste ->
+      (* On garde  l'instruction Move et continuer sur le reste du programme *)
+      List.map (fun choice -> Move t :: choice) (all_choices reste)
+    | Repeat (nb, sousProg) :: reste ->
+      (*On élimine le Repeat en générant toutes les combinaisons possibles pour `sousProg`  répété nb fois *)
+        let sous_choices = all_choices sousProg in
+        let repeated_choices =
+        let rec repeat_program p nb =
+            if nb = 0 then [[]]
+            else
+              let sub_repeats = repeat_program p (nb - 1) in
+              List.flatten (List.map (fun choice -> List.map (fun sub -> choice @ sub) p) sub_repeats)
+              in
+                repeat_program sous_choices nb
+        in
+        List.flatten (List.map (fun repeated -> List.map (fun rest -> repeated @ rest) (all_choices reste)) repeated_choices)
+    | Either (prog1, prog2) :: reste ->
+      (* On décompose l'instruction Either en deux branches  *)
+        let choices1 = all_choices prog1 in
+        let choices2 = all_choices prog2 in
+        let reste_choices = all_choices reste in
+        (* et puis on combine chaque choix possible de Either avec le reste du programme *)
+        List.flatten (
+          List.map (fun choice1 -> List.map (fun rest -> choice1 @ rest) reste_choices) choices1 @
+          List.map (fun choice2 -> List.map (fun rest -> choice2 @ rest) reste_choices) choices2
+        )
 
 let target_reached (prog : program) (p : point) (r : rectangle) : bool =
   failwith "À compléter"
