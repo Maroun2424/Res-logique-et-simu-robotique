@@ -113,4 +113,12 @@ let rec all_choices (prog : program) : program list =
         )
 
 let target_reached (prog : program) (p : point) (r : rectangle) : bool =
-  failwith "À compléter"
+  (* Étape 1 : on génère toutes les exécutions possibles *)
+    let executions = all_choices prog in
+    (* Étape 2 : On vérifie que toutes les exécutions terminent dans  le rectangle cible*)
+    List.for_all (fun det_prog ->
+    (*La position finale ( queue of the list ) pour chaque programme déterministe *)
+      match List.rev (run_det det_prog p) with
+        | [] -> false (* Aucune position n'est retournée *)
+        | final_position :: _ -> in_rectangle r final_position
+    ) executions
