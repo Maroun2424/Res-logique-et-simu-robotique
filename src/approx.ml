@@ -4,7 +4,10 @@ open Interp
 (* Code de la Section 5 du projet. *)
 
 let sample (rect : rectangle) : point =
-  failwith "À compléter"
+  let x= Random.float ( rect.x_max -. rect.x_min) +. rect.x_min
+  and  y= Random.float  ( rect.y_max -. rect.y_min) +. rect.y_min
+  in
+  { x; y } (*Génère un point aléatoire à l'intérieur du rectangle *)
   
 let transform_rect (t : transformation) (r : rectangle) : rectangle =
   failwith "À compléter"
