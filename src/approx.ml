@@ -10,7 +10,17 @@ let sample (rect : rectangle) : point =
   { x; y } (*Génère un point aléatoire à l'intérieur du rectangle *)
   
 let transform_rect (t : transformation) (r : rectangle) : rectangle =
-  failwith "À compléter"
+  match t with
+  | Translate v ->
+  (* Applique la translation au rectangle *)
+    {  x_min = r.x_min +. v.x;
+      x_max = r.x_max +. v.x;
+      y_min = r.y_min +. v.y;
+      y_max = r.y_max +. v.y}
+  | Rotate (c, alpha) ->
+  (* Applique la rotation au rectangle et calcule le nouveau rectangle englobant *)
+    let rotated_corners = List.map (rotate c alpha) (corners r) in
+    rectangle_of_list rotated_corners  
 
 let run_rect (prog : program) (r : rectangle) : rectangle list =
   failwith "À compléter"
