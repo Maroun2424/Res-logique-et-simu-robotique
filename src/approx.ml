@@ -12,15 +12,20 @@ let sample (rect : rectangle) : point =
 let transform_rect (t : transformation) (r : rectangle) : rectangle =
   match t with
   | Translate v ->
-  (* Applique la translation au rectangle *)
-    {  x_min = r.x_min +. v.x;
-      x_max = r.x_max +. v.x;
-      y_min = r.y_min +. v.y;
-      y_max = r.y_max +. v.y}
+      (*On  applique translate sur les sommets pour générer le rectangle transformé*)
+      let corners_image =
+        List.map (fun p -> translate v p) (corners r)
+       in
+      rectangle_of_list corners_image
   | Rotate (c, alpha) ->
-  (* Applique la rotation au rectangle et calcule le nouveau rectangle englobant *)
-    let rotated_corners = List.map (rotate c alpha) (corners r) in
-    rectangle_of_list rotated_corners  
+      (* Ici on  applique transform (rotation) *)
+      let corners_image =
+            List.map (fun p -> transform  t p) (corners r)
+            (* On peut avoir un quadrilatère irrégulier et donc La fonction rectangle_of_list nous 
+            renvoie le plus petit rectangle aligné avec les axes (rectangle droit) qui englobe tous ces sommets.
+            donc on a automatiquement la meilleure sur-approximation alignée sur les axes *)
+      in
+      rectangle_of_list corners_image  
 
 let run_rect (prog : program) (r : rectangle) : rectangle list =
   failwith "À compléter"
