@@ -27,8 +27,26 @@ let transform_rect (t : transformation) (r : rectangle) : rectangle =
       in
       rectangle_of_list corners_image  
 
-let run_rect (prog : program) (r : rectangle) : rectangle list =
-  failwith "À compléter"
+let rec run_rect (prog : program) (rect : rectangle) : rectangle list =
+  match prog with
+    | [] -> [rect]  (* Cas de base; programme vide.\   *)
+    | Move t :: reste ->
+        let new_rect = transform_rect t rect in
+        rect :: run_rect reste new_rect  (* Ajout du rectangle transformé à *)
+    | Repeat (n, sousProg) :: reste -> (* Cas repeat : TODO a ameliorer  et redundant code  *)
+        let rec repeat rect_current n acc =
+              if n = 0 then acc
+              else 
+                let new_rects = run_rect sousProg rect_current in (* tout les rectangles obtenus d'une execution de sousprog *)
+                let last_rect = List.hd (List.rev new_rects) in (*on prend le dernier rectangle en inversant la liste *)
+                repeat last_rect (n - 1) (acc @ List.tl new_rects) (* on continue d'executer le sousprog*)
+            in 
+            let repeated_rects = repeat rect n [rect] in
+            let without_last = List.rev (List.tl (List.rev repeated_rects)) in (* a revoir *)
+            without_last @ run_rect reste (List.hd (List.rev repeated_rects))
+    | Either (prog1, prog2) :: reste -> (* cas either similaire comme run*)
+        let choix= if  Random.bool ()  then prog1 else prog2  in
+        run_rect (choix @ reste) rect
 
 let inclusion (r : rectangle) (t : rectangle) : bool =
   failwith "À compléter"
