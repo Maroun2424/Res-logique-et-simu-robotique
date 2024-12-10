@@ -49,7 +49,7 @@ let rec run_rect (prog : program) (rect : rectangle) : rectangle list =
         run_rect (choix @ reste) rect
 
 let inclusion (r : rectangle) (t : rectangle) : bool =
-  failwith "À compléter"
+  r.x_min >= t.x_min && r.x_max <= t.x_max && r.y_min >= t.y_min && r.y_max <= t.y_max (*renvoie true si le premier rectangle estcontenu entièrement dans le second, false sinon*)
 
 let target_reached_rect (prog : program) (r : rectangle) (target : rectangle) : bool =
   failwith "À compléter"
