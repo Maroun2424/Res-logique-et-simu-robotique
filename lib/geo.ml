@@ -1,4 +1,3 @@
-
 (* Code de la Section 3 du projet. *)
 
 type coord2D = {
