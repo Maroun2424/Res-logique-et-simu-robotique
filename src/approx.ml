@@ -90,8 +90,34 @@ let inclusion (r : rectangle) (t : rectangle) : bool =
     ) all_executions
 
 
-let run_polymorphe (transform : transformation -> 'a -> 'a) (prog : program) (i : 'a) : 'a list =
-  failwith "À compléter"
+let rec run_polymorphe (transform : transformation -> 'a -> 'a) (prog : program) (i : 'a) : 'a list =
+    match prog with
+      | [] -> [i]  (* Cas de base : programme vide *)
+      | Move t :: reste ->
+        let new_i = transform t i in
+        i :: run_polymorphe transform reste new_i
+
+      | Repeat (n, sousProg) :: reste ->
+            (* Appelle récursivement run_polymorphe sur le sous-programme *)
+            let repeated_states =
+              let rec repeat current_i n acc =
+                if n = 0 then acc
+                else
+                let new_states = run_polymorphe transform sousProg current_i in
+                let last_state = List.hd (List.rev new_states) in
+              repeat last_state (n - 1) (acc @ List.tl new_states)
+              in
+            repeat i n [i]
+            in
+            (* Combine les états répétés avec la suite du programme *)
+            let without_last = List.rev (List.tl (List.rev repeated_states)) in
+            without_last @ run_polymorphe transform reste (List.hd (List.rev repeated_states))
+      
+      | Either (prog1, prog2) :: reste ->
+        (* Choix non déterministe : on exécute l'un des deux sous-programmes *)
+        let choix = if Random.bool () then prog1 else prog2 in
+        run_polymorphe transform (choix @ reste) i
+    
 
 let rec over_approximate (prog : program) (r : rectangle) : rectangle =
   failwith "À compléter"
