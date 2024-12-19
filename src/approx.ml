@@ -162,5 +162,7 @@ let rec over_approximate (prog : program) (r : rectangle) : rectangle =
           } in
           over_approximate reste r_new
 
+(* Vérifie si une cible est atteinte via la sur-approximation *)
 let feasible_target_reached (prog : program) (r : rectangle) (target : rectangle) : bool =
-  failwith "À compléter"
+  let over_approx = over_approximate prog r in
+  inclusion over_approx target
