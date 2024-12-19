@@ -51,8 +51,44 @@ let rec run_rect (prog : program) (rect : rectangle) : rectangle list =
 let inclusion (r : rectangle) (t : rectangle) : bool =
   r.x_min >= t.x_min && r.x_max <= t.x_max && r.y_min >= t.y_min && r.y_max <= t.y_max (*renvoie true si le premier rectangle estcontenu entièrement dans le second, false sinon*)
 
-let target_reached_rect (prog : program) (r : rectangle) (target : rectangle) : bool =
-  failwith "À compléter"
+  (* Méthode auxiliaire pour toutes les exécutions du programme possible *)
+  let rec run_all_rects (prog : program) (rect : rectangle) : rectangle list list =
+    match prog with
+    | [] -> [[rect]]  (* Une seule exécution avec la position initiale *)
+    | Move t :: reste ->
+        let new_rect = transform_rect t rect in
+        let rest_executions = run_all_rects reste new_rect in
+        List.map (fun exec -> rect :: exec) rest_executions
+    | Repeat (n, sousProg) :: reste ->
+        let rec repeat rect_current n acc =
+          if n = 0 then [acc]
+          else
+            let new_rects = run_all_rects sousProg rect_current in
+            let repeated_executions =
+              List.concat (List.map (fun new_exec ->
+                let last_rect = List.hd (List.rev new_exec) in
+                repeat last_rect (n - 1) (acc @ (List.tl new_exec))
+              ) new_rects)
+            in
+            repeated_executions
+        in
+        let repeated_rects = repeat rect n [rect] in
+        List.concat (List.map (fun repeated_execution ->
+          let final_rect = List.hd (List.rev repeated_execution) in
+          List.map (fun exec -> repeated_execution @ exec) (run_all_rects reste final_rect)
+        ) repeated_rects)
+    | Either (prog1, prog2) :: reste ->
+        let exec1 = run_all_rects (prog1 @ reste) rect in
+        let exec2 = run_all_rects (prog2 @ reste) rect in
+        exec1 @ exec2
+
+  let target_reached_rect (prog : program) (r : rectangle) (target : rectangle) : bool =
+    let all_executions = run_all_rects prog r in
+    List.for_all (fun exec ->
+      let last_rect = List.hd (List.rev exec) in
+      inclusion last_rect target
+    ) all_executions
+
 
 let run_polymorphe (transform : transformation -> 'a -> 'a) (prog : program) (i : 'a) : 'a list =
   failwith "À compléter"
