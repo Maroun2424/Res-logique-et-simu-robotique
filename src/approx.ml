@@ -118,9 +118,49 @@ let rec run_polymorphe (transform : transformation -> 'a -> 'a) (prog : program)
         let choix = if Random.bool () then prog1 else prog2 in
         run_polymorphe transform (choix @ reste) i
     
+    
+    
+(* Méthode auxilaire pour calculer le plus petit rectangle qui englobe r1 et r2 *)
+let bounding_rect (r1 : rectangle) (r2 : rectangle) : rectangle =
+    {
+      x_min = min r1.x_min r2.x_min;
+      x_max = max r1.x_max r2.x_max;
+      y_min = min r1.y_min r2.y_min;
+      y_max = max r1.y_max r2.y_max;
+    }
 
 let rec over_approximate (prog : program) (r : rectangle) : rectangle =
-  failwith "À compléter"
+    match prog with
+      | [] -> r
+      
+      | Move t :: reste ->
+        let corners_list = corners r in
+        let transformed_corners = List.map (transform t) corners_list in
+        let r_new = rectangle_of_list transformed_corners in
+        over_approximate reste r_new
+    
+      | Either (prog1, prog2) :: reste ->
+        let r1 = over_approximate prog1 r in
+        let r2 = over_approximate prog2 r in
+        let r_combined = bounding_rect r1 r2 in
+        over_approximate reste r_combined
+    
+      | Repeat (n, sous_prog) :: reste ->
+          (* Calcul de la sur-approximation du sous-programme une seule fois *)
+          let r_sub = over_approximate sous_prog r in
+          (* On calcule les déplacements minimaux et maximaux *)
+          let delta_x_min = r_sub.x_min -. r.x_min in
+          let delta_x_max = r_sub.x_max -. r.x_max in
+          let delta_y_min = r_sub.y_min -. r.y_min in
+          let delta_y_max = r_sub.y_max -. r.y_max in
+          (*Onn calcule le rectangle après n répétitions *)
+          let r_new = {
+            x_min = r.x_min +. (float_of_int n) *. delta_x_min;
+            x_max = r.x_max +. (float_of_int n) *. delta_x_max;
+            y_min = r.y_min +. (float_of_int n) *. delta_y_min;
+            y_max = r.y_max +. (float_of_int n) *. delta_y_max;
+          } in
+          over_approximate reste r_new
 
 let feasible_target_reached (prog : program) (r : rectangle) (target : rectangle) : bool =
   failwith "À compléter"
