@@ -321,7 +321,7 @@ let () =
           fill_circle x y 4;
 
         synchronize ();
-        Unix.sleepf 0.001;
+        Unix.sleepf 0.01;
         display_positions rest (step + 1)
   in
 
