@@ -138,6 +138,21 @@ let draw_axes width height =
   draw_ticks_x 0;
   draw_ticks_y 0
 
+(* Convertir une instruction en string (pour l'afficher dans le stdout avec -print)*)
+let rec string_of_instruction = function
+  | Move (Translate v) ->
+      Printf.sprintf "Move(Translate(%.2f, %.2f))" v.x v.y
+  | Move (Rotate (p, a)) ->
+      Printf.sprintf "Move(Rotate((%.2f, %.2f), %.2f))" p.x p.y a
+  | Repeat (n, subprog) ->
+      Printf.sprintf "Repeat(%d, [%s])" n (string_of_program subprog)
+  | Either (progA, progB) ->
+      Printf.sprintf "Either([%s], [%s])"
+        (string_of_program progA) (string_of_program progB)
+
+and string_of_program program =
+  String.concat "; " (List.map string_of_instruction program)
+
 let () =
   try loop 5
   with Quit -> close_graph ();;
