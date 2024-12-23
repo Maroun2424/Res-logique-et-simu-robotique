@@ -39,23 +39,24 @@ let rec unfold_repeat_aux (prog : program ) ( acc : program ) : program =
 let unfold_repeat (prog : program) : program =
     unfold_repeat_aux prog [] (* récursion terminale *)
 
+(* Fonction auxiliaire pour déplier un Repeat *)
+let rec expand_repeat (n : int) (sousProg : program) (acc : program) : program =
+  if n = 0 then acc (* Cas de base : on retourne l'accumulateur *)
+  else expand_repeat (n - 1) sousProg (acc @ sousProg) (* On répète le sous-programme n fois *)
+
 let rec run_det (prog : program) (p : point) : point list =
   (* On génère la liste de toutes les positions visitées par le robot pendant l'exécution *)
   (* On peut utiliser unfold_repeat mais celà applatit le programme ce qui baisse l'efficacité dans le cas de long program *)
   match prog with
   | [] -> [p]  (* Cas de base : On retourne le point de départ comme seule position visitée *)
-  | Move t :: reste ->  
+  | Move t :: reste ->
       let nouveau_point = transform t p in (*  On applique la transformation `t` au point courant `p` pour obtenir une nouvelle position *)
       p :: run_det reste nouveau_point  (* On ajoute le `nouveau_point` à la liste des positions visitées *)
   | Repeat (n, sousProg) :: reste ->
-    (*  On déplie le Repeat avec la fonction auxiliaire repeat qui crée une liste contenant n copies du sousProg
+    (*  On déplie le Repeat avec la fonction auxiliaire expand_repeat qui crée une liste contenant n copies du sousProg
         prog_deplie est exécuté en continuant avec le reste du programme `reste` *)
-      let rec repeat extractedList nb =
-        if nb = 0 then extractedList   (*  On retourne toutes les répétitions de `sousProg` *)
-        else repeat (extractedList @ sousProg) (nb - 1)
-      in
-      let prog_deplie = repeat [] n in (* programme déplié sans Repeat *)
-      run_det (prog_deplie @ reste) p  (* Exécuter le programme déplié puis le reste *)
+        let prog_deplie = expand_repeat n sousProg [] in
+        run_det (prog_deplie @ reste) p
   | Either _ :: _ -> failwith "Programme Non déterministe"
   
 let target_reached_det (prog : program) (p : point) (target : rectangle) : bool =
@@ -64,30 +65,19 @@ let target_reached_det (prog : program) (p : point) (target : rectangle) : bool 
     | [] -> false
     | derniere_pos :: _ -> in_rectangle target derniere_pos (* Vérifier si la dernière position est à l'intérieure du rectangle cible *)
 
-
-(*TODO : Trouver un moyen d'enlver le code redondant*)
-
-(* simule l'exécution d'un programme quelconque à partir d'un point de départ donné *)
+(* Fonction principale pour exécuter un programme quelconque *)
 let rec run (prog : program) (p : point) : point list =
-  match prog with
-    | [] -> [p]  (* Cas de base : On retourne le point de départ comme seule position visitée *)
-    | Move t :: reste ->  
-        let nouveau_point = transform t p in (*  On applique la transformation `t` au point courant `p` pour obtenir une nouvelle position *)
-        p :: run reste nouveau_point  (* On ajoute le `nouveau_point` à la liste des positions visitées *)
-    | Repeat (n, sousProg) :: reste ->
-        (* On déplie la boucle Repeat pour exécuter le sous-programme `n` fois *)
-        let rec repeat extractedList nb =
-          if nb = 0 then extractedList   (*  On retourne toutes les répétitions de `sousProg` *)
-          else repeat (extractedList @ sousProg) (nb - 1)
-        in
-        let prog_deplie = repeat [] n in (* programme déplié sans Repeat *)
-        run (prog_deplie @ reste) p      (* Exécuter le programme déplié puis le reste *)
-    | Either (prog1, prog2) :: reste ->
-        (* On choisit aléatoirement l'une des branches avec Random.bool *)
-        let choix= if  Random.bool ()  then prog1 else prog2  in
-        run (choix @ reste) p  (* Exécuter le programme choisi puis le reste *)
-
-(*TODO : Trouver un moyen d'enlver le code redondant*)
+  match prog with (* code similaire à run_det*)
+  | [] -> [p]
+  | Move t :: reste ->
+      let nouveau_point = transform t p in
+      p :: run reste nouveau_point
+  | Repeat (n, sousProg) :: reste ->
+      let prog_deplie = expand_repeat n sousProg [] in
+      run (prog_deplie @ reste) p
+  | Either (prog1, prog2) :: reste ->
+      let choix= if Random.bool () then prog1 else prog2 in (* cas Either : on choisit aléatoirement une branche *)
+      run (choix @ reste) p
 
 let rec all_choices (prog : program) : program list =
   match prog with
