@@ -210,6 +210,74 @@ let program4 = [
   ])
 ]
 
+(* Fonction principale *)
 let () =
-  try loop 5
-  with Quit -> close_graph ();;
+  let config = parse_args () in
+  let size_spec = Printf.sprintf " %dx%d" config.width config.height in
+  open_graph size_spec;
+
+  (* Couleur de fond *)
+  (match config.background_color with
+  | Some c -> set_color c; fill_rect 0 0 config.width config.height
+  | None -> ());
+
+  (* Dessiner les axes*)
+  draw_axes config.width config.height;
+
+  (*Charger le programme selectionné *)
+  let program =
+    match config.prog_number with
+    | 1 -> program1
+    | 2 -> program2
+    | 3 -> program3
+    | 4 -> program4
+    | _ -> failwith "Numero de programme invalide"
+  in
+
+  (* Si l'option -abs est spécifiée*)
+  (match config.abs_rectangle with
+   | Some rect ->
+       let approximated_rect = over_approximate program rect in
+       (match config.rectangle_color with
+        | Some color -> draw_rectangle approximated_rect color 1.0
+        | None -> draw_rectangle approximated_rect blue 1.0)
+   | None -> ());
+
+  (* Point initial *)
+  let initial_point = { x = 0.0; y = 0.0 } in
+
+  (* Execution du programme et affichage des positions *)
+  let positions =
+    try run program initial_point
+    with Failure msg ->
+      close_graph ();
+      failwith ("Erreur lors de l'exécution du programme : " ^ msg)
+  in
+
+  let rec display_positions positions step =
+    match positions with
+    | [] -> ()
+    | p :: rest ->
+        (* Affichage du programme si demandé *)
+        if config.print_code then begin
+          Printf.printf "Step %d: %s\n%!" step (string_of_program program)
+        end;
+
+        (* Dessiner les points si l'option -cr est activée *)
+        if config.display_points then
+          let color = Option.value config.point_color ~default:red in
+          let (x, y) = transform_point p config.width config.height 1.0 in
+          set_color color;
+          fill_circle x y 4;
+
+        synchronize ();
+        Unix.sleepf 0.02;
+        display_positions rest (step + 1)
+  in
+
+  display_positions positions 0;
+
+  (* Attendre un clic pour quitter *)
+  let _ = wait_next_event [Button_down] in
+  close_graph ();
+
