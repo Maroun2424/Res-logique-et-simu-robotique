@@ -91,14 +91,16 @@ let parse_args () =
   parse args default_config
 
 (* Dessin d'un rectangle (utilisé si -abs est spécifié) *)
-let draw_rectangle (rect : rectangle) color scaling_factor =
+let draw_rectangle (rect : rectangle) color scaling_factor width height =
   set_color color;
-  let x = int_of_float (rect.x_min *. scaling_factor) in
-  let y = int_of_float (rect.y_min *. scaling_factor) in
+  
+  (* Transformation des coordonnées pour centrer le rectangle *)
+  let x = int_of_float (rect.x_min *. scaling_factor) + (width / 2) in
+  let y = int_of_float (rect.y_min *. scaling_factor) + (height / 2) in
   let w = int_of_float ((rect.x_max -. rect.x_min) *. scaling_factor) in
   let h = int_of_float ((rect.y_max -. rect.y_min) *. scaling_factor) in
+  
   draw_rect x y w h
-
 (* Axe gradué*)
 let draw_axes width height =
   let step_x = 100 in  (* pour l'axe X *)
@@ -158,6 +160,13 @@ let transform_point (p : point) width height scaling_factor =
   let x = int_of_float (p.x *. scaling_factor) + (width / 2) in
   let y = int_of_float (p.y *. scaling_factor) + (height / 2) in
   (x, y)
+
+(* Vérification que le rectangle d'approximation contient l'origine *)
+let check_origin_included rect =
+  if rect.x_min > 0.0 || rect.x_max < 0.0 || rect.y_min > 0.0 || rect.y_max < 0.0 then
+    failwith "Le rectangle d'approximation doit contenir l'origine (0,0)."
+  else
+    ()
 
 (*Programmes predefinis *)
 let program1 = [
@@ -261,42 +270,55 @@ let program4 = [
 ]
 
 (* Fonction principale *)
+(* Fonction principale *)
 let () =
+  (* Parsing et configuration *)
   let config = parse_args () in
+
+  (* Vérification du rectangle d'approximation contenant l'origine *)
+  (match config.abs_rectangle with
+   | Some rect -> check_origin_included rect
+   | None -> ());
+
+  (* Configuration de la fenêtre graphique *)
   let size_spec = Printf.sprintf " %dx%d" config.width config.height in
   open_graph size_spec;
 
-  (* Couleur de fond *)
+  (* Définir et remplir la couleur de fond *)
   (match config.background_color with
-  | Some c -> set_color c; fill_rect 0 0 config.width config.height
-  | None -> ());
+   | Some c ->
+       set_color c;
+       fill_rect 0 0 config.width config.height
+   | None -> ());
 
-  (* Dessiner les axes*)
+  (* Dessin des axes *)
   draw_axes config.width config.height;
 
-  (*Charger le programme selectionné *)
+  (* Sélection du programme à exécuter *)
   let program =
     match config.prog_number with
     | 1 -> program1
     | 2 -> program2
     | 3 -> program3
     | 4 -> program4
-    | _ -> failwith "Numero de programme invalide"
+    | _ -> failwith "Numéro de programme invalide"
   in
 
-  (* Si l'option -abs est spécifiée*)
+  (* Affichage du rectangle d'approximation si spécifié *)
   (match config.abs_rectangle with
    | Some rect ->
        let approximated_rect = over_approximate program rect in
-       (match config.rectangle_color with
-        | Some color -> draw_rectangle approximated_rect color 1.0
-        | None -> draw_rectangle approximated_rect blue 1.0)
+       draw_rectangle approximated_rect
+                      (Option.value config.rectangle_color ~default:blue)
+                      1.0
+                      config.width
+                      config.height
    | None -> ());
 
-  (* Point initial *)
+  (* Position initiale du robot *)
   let initial_point = { x = 0.0; y = 0.0 } in
 
-  (* Execution du programme et affichage des positions *)
+  (* Exécution du programme et récupération des positions *)
   let positions =
     try run program initial_point
     with Failure msg ->
@@ -304,30 +326,43 @@ let () =
       failwith ("Erreur lors de l'exécution du programme : " ^ msg)
   in
 
-  let rec display_positions positions step =
-    match positions with
-    | [] -> ()
-    | p :: rest ->
-        (* Affichage du programme si demandé *)
+  (* Fonction d'affichage des positions pas à pas *)
+  let rec display_positions positions program steps =
+    match positions, program with
+    | [], _ -> ()
+    | p :: rest, instr :: instr_rest ->
         if config.print_code then begin
-          Printf.printf "Step %d: %s\n%!" step (string_of_program program)
+          Printf.printf "Step %d: %s\n%!" steps (string_of_instruction instr)
         end;
 
-        (* Dessiner les points si l'option -cr est activée *)
-        if config.display_points then
+        if config.display_points then begin
           let color = Option.value config.point_color ~default:red in
           let (x, y) = transform_point p config.width config.height 1.0 in
           set_color color;
           fill_circle x y 4;
+        end;
 
         synchronize ();
-        Unix.sleepf 0.01;
-        display_positions rest (step + 1)
+        Unix.sleepf 0.02;
+        display_positions rest instr_rest (steps + 1)
+    | p :: rest, [] ->
+        (* Si le programme est terminé mais des positions restent *)
+        if config.print_code then
+          Printf.printf "Step %d: Fin du programme\n%!" steps;
+        if config.display_points then begin
+          let color = Option.value config.point_color ~default:red in
+          let (x, y) = transform_point p config.width config.height 1.0 in
+          set_color color;
+          fill_circle x y 4;
+        end;
+        synchronize ();
+        Unix.sleepf 0.02;
+        display_positions rest [] (steps + 1)
   in
 
-  display_positions positions 0;
+  (* Affichage des positions pas à pas *)
+  display_positions positions program 0;
 
-  (* Attendre un clic pour quitter *)
+  (* Attente d'un clic pour fermer la fenêtre *)
   let _ = wait_next_event [Button_down] in
   close_graph ();
-
