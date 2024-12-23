@@ -216,7 +216,29 @@ let program2 = [
 ]
 
 let program3 = [
-  Repeat (100, [Move (Translate {x = 1.0; y = 0.0})])
+  Repeat (100, [Move (Translate {x = 1.0; y = 0.0})]);
+  Repeat (100, [ Move (Translate {x = 0.0; y = 1.0}) ]);
+  Repeat (50, [ Move (Translate {x = 1.0; y = 0.0}) ]);
+  Repeat (50, [ Move (Translate {x = 0.0; y = 1.0}) ]);
+  Repeat (300, [ Move (Translate {x = -1.0; y = 0.0}) ]);
+  Repeat (50, [ Move (Translate {x = 0.0; y = -1.0}) ]);
+  Repeat (50, [ Move (Translate {x = 1.0; y = 0.0}) ]);
+  Repeat (100, [ Move (Translate {x = 0.0; y = -1.0}) ]);
+  Repeat (100, [ Move (Translate {x = 1.0; y = 0.0}) ]);
+  Move (Translate {x = 200.0; y = -200.0});
+  Repeat (50, [ Move (Translate {x = 1.0; y = 0.0}) ]);
+  Repeat (50, [ Move (Translate {x = 0.0; y = 1.0}) ]);
+  Repeat (25, [ Move (Translate {x = 1.0; y = 0.0}) ]);
+  Repeat (25, [ Move (Translate {x = 0.0; y = 1.0}) ]);
+  Repeat (75, [ Move (Translate {x = -1.0; y = 0.0}) ]);
+  Repeat (75, [ Move (Translate {x = 0.0; y = -1.0}) ]);
+  Move (Translate {x = -400.0; y = 0.0});
+  Repeat (75, [ Move (Translate {x = 0.0; y = 1.0}) ]);
+  Repeat (75, [ Move (Translate {x = -1.0; y = 0.0}) ]);
+  Repeat (25, [ Move (Translate {x = 0.0; y = -1.0}) ]);
+  Repeat (25, [ Move (Translate {x = 1.0; y = 0.0}) ]);
+  Repeat (50, [ Move (Translate {x = 0.0; y = -1.0}) ]);
+  Repeat (50, [ Move (Translate {x = 1.0; y = 0.0}) ]);
 ]
 
 let program4 = [
@@ -299,7 +321,7 @@ let () =
           fill_circle x y 4;
 
         synchronize ();
-        Unix.sleepf 0.01;
+        Unix.sleepf 0.001;
         display_positions rest (step + 1)
   in
 
