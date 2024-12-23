@@ -99,6 +99,45 @@ let draw_rectangle (rect : rectangle) color scaling_factor =
   let h = int_of_float ((rect.y_max -. rect.y_min) *. scaling_factor) in
   draw_rect x y w h
 
+(* Axe gradué*)
+let draw_axes width height =
+  let step_x = 100 in  (* pour l'axe X *)
+  let step_y = 100 in   (*pour l'axe Y *)
+  set_color black;
+
+  (* Axe X *)
+  moveto 0 (height / 2);
+  lineto width (height / 2);
+
+  (* Axe Y *)
+  moveto (width / 2) 0;
+  lineto (width / 2) height;
+
+  (* Graduation sur l'axe X *)
+  let rec draw_ticks_x x =
+    if x > width then ()
+    else begin
+      moveto x (height / 2 - 5);
+      lineto x (height / 2 + 5);
+      moveto x (height / 2 + 10);
+      draw_string (string_of_int (x - width / 2));
+      draw_ticks_x (x + step_x)
+    end
+  in
+  (* Graduation sur l'axe Y *)
+  let rec draw_ticks_y y =
+    if y > height then ()
+    else begin
+      moveto (width / 2 - 5) y;
+      lineto (width / 2 + 5) y;
+      moveto (width / 2 + 10) y;
+      draw_string (string_of_int (y - height / 2));
+      draw_ticks_y (y + step_y)
+    end
+  in
+  draw_ticks_x 0;
+  draw_ticks_y 0
+
 let () =
   try loop 5
   with Quit -> close_graph ();;
