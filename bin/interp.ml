@@ -28,7 +28,7 @@ let default_config = {
   point_color = Some red;
   width = 800;
   height = 800;
-  prog_number = 1;
+  prog_number = 2;
   print_code = false;                        (* Par défaut, pas d'affichage terminal *)
 }
 
@@ -183,28 +183,35 @@ let program1 = [
 ]
 
 let program2 = [
-  Move (Translate {x = 40.; y = 0.});
+  Move (Translate {x = 0.0; y = -100.0});
+
   Repeat (36, [
-    Move (Rotate ({x=0.; y=0.}, 10.));
-    Move (Translate {x=30.; y=0.})
+    Move (Translate {x = 10.0; y = 0.0});  
+    Move (Rotate ({x = 0.0; y = 0.0}, 10.0))
   ]);
-  Move (Translate {x = -40.; y = 10.});
-  Move (Translate {x=3.; y=0.});
+
+  Move (Translate {x = 0.0; y = 100.0});
+
+  Move (Translate {x = -30.0; y = 50.0});  
   Repeat (12, [
-    Move (Rotate ({x= -10.; y= 10.}, 30.));
-    Move (Translate {x=3.; y=0.})
+    Move (Translate {x = 5.0; y = 0.0});  
+    Move (Rotate ({x = -30.0; y = 50.0}, 30.0))
   ]);
-  Move (Translate {x = 20.; y = 0.});
-  Move (Translate {x=3.; y=0.});
+
+  Move (Translate {x = 60.0; y = 0.0});
   Repeat (12, [
-    Move (Rotate ({x=10.; y=10.}, 30.));
-    Move (Translate {x=3.; y=0.})
+    Move (Translate {x = 5.0; y = 0.0});
+    Move (Rotate ({x = 30.0; y = 50.0}, 30.0))
   ]);
-  Move (Translate {x = -8.; y = -10.});
-  Move (Translate {x = 10.; y = 0.});
-  Repeat (18, [
-    Move (Rotate ({x= -8.; y= 0.}, -10.));
-    Move (Translate {x=10.; y=0.})
+
+  Move (Translate {x = -60.0; y = 0.0});
+
+  Move (Translate {x = 0.0; y = 0.0});
+  Move (Rotate ({x = 0.0; y = 0.0}, 90.0));
+
+  Repeat (8, [
+    Move (Translate {x = 4.0; y = 0.0});
+    Move (Rotate ({x = 0.0; y = -20.0}, 15.0))
   ])
 ]
 
@@ -286,7 +293,7 @@ let () =
           fill_circle x y 4;
 
         synchronize ();
-        Unix.sleepf 0.001;
+        Unix.sleepf 0.01;
         display_positions rest (step + 1)
   in
 
