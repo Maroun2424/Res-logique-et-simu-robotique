@@ -79,35 +79,38 @@ let rec run (prog : program) (p : point) : point list =
       let choix= if Random.bool () then prog1 else prog2 in (* cas Either : on choisit aléatoirement une branche *)
       run (choix @ reste) p
 
+(* Fonction auxilaiire :
+    si p1 =[[A];[B]] et p2 =[[C];[D]] alors combine p1 p2 = [[A;C];[A;D];[B;C];[B;D]]
+*)
+let combine p1 p2 =
+  List.flatten (List.map (fun x -> List.map (fun y -> x @ y) p2) p1)
+
+
 let rec all_choices (prog : program) : program list =
   match prog with
-    | [] -> [[]]  (* Cas de base : un programme vide a une seule version déterministe, lui-même *)
-    | Move t :: reste ->
-      (* On garde  l'instruction Move et continuer sur le reste du programme *)
+  | [] -> [[]]
+  | Move t :: reste ->
       List.map (fun choice -> Move t :: choice) (all_choices reste)
-    | Repeat (nb, sousProg) :: reste ->
-      (*On élimine le Repeat en générant toutes les combinaisons possibles pour `sousProg`  répété nb fois *)
-        let sous_choices = all_choices sousProg in
-        let repeated_choices =
-        let rec repeat_program p nb =
-            if nb = 0 then [[]]
-            else
-              let sub_repeats = repeat_program p (nb - 1) in
-              List.flatten (List.map (fun choice -> List.map (fun sub -> choice @ sub) p) sub_repeats)
-              in
-                repeat_program sous_choices nb
-        in
-        List.flatten (List.map (fun repeated -> List.map (fun rest -> repeated @ rest) (all_choices reste)) repeated_choices)
-    | Either (prog1, prog2) :: reste ->
+  | Repeat (n, sousProg) :: reste ->
+      let sous_choices = all_choices sousProg in
+      (* Définition de la fonction interne de répétition *)
+      let rec repeat_program p nb =
+        if nb = 0 then [[]]
+        else
+          let sub_repeats = repeat_program p (nb - 1) in
+          (* Pour chaque liste dans sub_repeats, on concatène avec tous les choix dans p *)
+          combine sub_repeats p
+      in
+      let repeated_choices = repeat_program sous_choices n in
+      let reste_choices = all_choices reste in
+      combine repeated_choices reste_choices
+  | Either (prog1, prog2) :: reste ->
       (* On décompose l'instruction Either en deux branches  *)
-        let choices1 = all_choices prog1 in
-        let choices2 = all_choices prog2 in
-        let reste_choices = all_choices reste in
-        (* et puis on combine chaque choix possible de Either avec le reste du programme *)
-        List.flatten (
-          List.map (fun choice1 -> List.map (fun rest -> choice1 @ rest) reste_choices) choices1 @
-          List.map (fun choice2 -> List.map (fun rest -> choice2 @ rest) reste_choices) choices2
-        )
+      let choices1 = all_choices prog1 in
+      let choices2 = all_choices prog2 in
+      let reste_choices = all_choices reste in
+      (* et puis on combine chaque choix possible de Either avec le reste du programme *)
+      combine choices1 reste_choices @ combine choices2 reste_choices
 
 let target_reached (prog : program) (p : point) (r : rectangle) : bool =
   (* Étape 1 : on génère toutes les exécutions possibles *)
