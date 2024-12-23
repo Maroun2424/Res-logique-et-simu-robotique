@@ -221,15 +221,21 @@ let program3 = [
 
 let program4 = [
   Either (
-    [Repeat (100, [Move (Translate {x = 1.0; y = 0.0})])], 
-    [Repeat (100, [Move (Translate {x = 0.0; y = 1.0})])]  
+    [ Repeat (100, [ Move (Translate {x = 1.0; y = 0.0}) ]) ], 
+    [ Repeat (100, [ Move (Translate {x = 0.0; y = 1.0}) ]) ]
   );
+
   Repeat (100, [
     Either (
-      [Move (Translate {x = -1.0; y = 0.0})], 
-      [Move (Translate {x = 0.0; y = -1.0})]  
+      [ Move (Translate {x = -1.0; y = 0.0}) ], 
+      [ Move (Translate {x = 0.0; y = -1.0}) ]
     )
-  ])
+  ]);
+
+  Either (
+    [ Move (Translate {x = 10.0; y = 10.0}) ],
+    [ Move (Translate {x = -10.0; y = -10.0}) ]
+  )
 ]
 
 (* Fonction principale *)
