@@ -159,6 +159,57 @@ let transform_point (p : point) width height scaling_factor =
   let y = int_of_float (p.y *. scaling_factor) + (height / 2) in
   (x, y)
 
+(*Programmes predefinis *)
+let program1 = [
+  Repeat (50, [Move (Translate {x = 1.0; y = 0.0})]);
+  Repeat (50, [Move (Translate {x = 0.0; y = 1.0})]);
+  Repeat (50, [Move (Translate {x = -1.0; y = 0.0})]);
+  Repeat (50, [Move (Translate {x = 0.0; y = -1.0})])
+]
+
+let program2 = [
+  Move (Translate {x = 40.; y = 0.});
+  Repeat (36, [
+    Move (Rotate ({x=0.; y=0.}, 10.));
+    Move (Translate {x=30.; y=0.})
+  ]);
+  Move (Translate {x = -40.; y = 10.});
+  Move (Translate {x=3.; y=0.});
+  Repeat (12, [
+    Move (Rotate ({x= -10.; y= 10.}, 30.));
+    Move (Translate {x=3.; y=0.})
+  ]);
+  Move (Translate {x = 20.; y = 0.});
+  Move (Translate {x=3.; y=0.});
+  Repeat (12, [
+    Move (Rotate ({x=10.; y=10.}, 30.));
+    Move (Translate {x=3.; y=0.})
+  ]);
+  Move (Translate {x = -8.; y = -10.});
+  Move (Translate {x = 10.; y = 0.});
+  Repeat (18, [
+    Move (Rotate ({x= -8.; y= 0.}, -10.));
+    Move (Translate {x=10.; y=0.})
+  ])
+]
+
+let program3 = [
+  Repeat (100, [Move (Translate {x = 1.0; y = 0.0})])
+]
+
+let program4 = [
+  Either (
+    [Repeat (100, [Move (Translate {x = 1.0; y = 0.0})])], 
+    [Repeat (100, [Move (Translate {x = 0.0; y = 1.0})])]  
+  );
+  Repeat (100, [
+    Either (
+      [Move (Translate {x = -1.0; y = 0.0})], 
+      [Move (Translate {x = 0.0; y = -1.0})]  
+    )
+  ])
+]
+
 let () =
   try loop 5
   with Quit -> close_graph ();;
