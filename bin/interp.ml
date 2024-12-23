@@ -161,10 +161,25 @@ let transform_point (p : point) width height scaling_factor =
 
 (*Programmes predefinis *)
 let program1 = [
-  Repeat (50, [Move (Translate {x = 1.0; y = 0.0})]);
-  Repeat (50, [Move (Translate {x = 0.0; y = 1.0})]);
-  Repeat (50, [Move (Translate {x = -1.0; y = 0.0})]);
-  Repeat (50, [Move (Translate {x = 0.0; y = -1.0})])
+  (* Dessiner un carré avec des mouvements *)
+  Repeat (150, [Move (Translate {x = 1.0; y = 0.0})]);  (* Ligne droite vers la droite *)
+  Repeat (100, [Move (Translate {x = 0.0; y = 1.0})]);  (* Ligne droite vers le haut *)
+  Repeat (100, [Move (Translate {x = -1.0; y = 0.0})]); (* Ligne droite vers la gauche *)
+  Repeat (100, [Move (Translate {x = 0.0; y = -1.0})]); (* Ligne droite vers le bas *)
+
+  Repeat (200, [Move (Translate {x = -1.0; y = 0.0})]); 
+  Repeat (100, [Move (Translate {x = 0.0; y = 1.0})]);  
+  Repeat (100, [Move (Translate {x = 1.0; y = 0.0})]);  
+  Repeat (100, [Move (Translate {x = 0.0; y = -1.0})]);
+  Repeat (50, [Move (Translate {x = 1.0; y = 0.0})]); 
+
+  (* Simuler un rectangle "rempli" en diagonale *)
+  Repeat (80, [ 
+    Move (Translate {x = -1.0; y = -1.0}); (* Diagonale vers le bas gauche *)
+    Repeat (80, [Move (Translate {x = 1.0; y = -1.0})]); (* Ligne diagonale descendante *)
+    Move (Translate {x = -80.0; y = 80.0}) ;
+  ]);
+
 ]
 
 let program2 = [
@@ -271,7 +286,7 @@ let () =
           fill_circle x y 4;
 
         synchronize ();
-        Unix.sleepf 0.02;
+        Unix.sleepf 0.001;
         display_positions rest (step + 1)
   in
 
