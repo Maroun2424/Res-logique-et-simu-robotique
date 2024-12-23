@@ -37,3 +37,12 @@ pour lancer les tests personnels ajoutés :
 Le fichier qui contient la fonction "main" du project est `bin/interp.ml` .
 La commande pour compiler le projet est `dune build`,
 et celle pour compiler et lancer le main est `dune exec interp` suivie des options et des arguments éventuels.
+
+update readme.md
+pour tester nos programmes, il faut suivre cette syntaxe:
+dune exec interp (*pour executer le program 2 par defaut, et ca marche sans arguments*)
+dune exec interp -- n -k où n est le numero du program et k sont les arguments ou inversement
+
+par exemple pour tester le programme 2, avec l'option -size et -pc, la commande est : 
+dune exec interp -- 2 -pc 255 255 0 -size 600 600
+
