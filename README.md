@@ -27,6 +27,10 @@ Pour le lancer, exécutez la commande `make top`.
 
 Pour lancer tous les tests disponibles, exécutez `make test`.
 Pour tester seulement les fonctions de l'exercice *i*, exécutez `make test-i`.
+pour lancer les tests personnels ajoutés :
+ - Module geo.ml : `make test-geo`
+ - Module interp.ml : `make test-interp`
+ - Module approx.ml : `make test-approx`
 
 ## Lancer l'interpreteur
 

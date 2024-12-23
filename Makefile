@@ -19,6 +19,14 @@ test-% : phony
 .PHONY : test-geo
 test-geo :
 	@ $(opam_exec) dune exec test/test_geo.exe
+
+.PHONY : test-interp
+test-interp :
+	@ $(opam_exec) dune exec test/test_interp.exe
+
+.PHONY : test-approx
+test-approx :
+	@ $(opam_exec) dune exec test/test_approx.exe
 	
 .PHONY : top
 top :

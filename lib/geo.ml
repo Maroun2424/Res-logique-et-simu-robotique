@@ -27,8 +27,8 @@ let rotate (c : point) (alpha : angle) (p : point) : point =
     y = c.y +. (p.x -. c.x )*. Float.sin theta +. (p.y -. c.y)*. Float.cos theta }
   
 type transformation =
-  Translate of vector
-| Rotate of point * angle
+  | Translate of vector
+  | Rotate of point * angle
 
 let transform (t : transformation) (p : point) : point =
   match t with
