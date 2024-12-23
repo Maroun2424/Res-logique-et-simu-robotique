@@ -101,11 +101,13 @@ let draw_rectangle (rect : rectangle) color scaling_factor width height =
   let h = int_of_float ((rect.y_max -. rect.y_min) *. scaling_factor) in
   
   draw_rect x y w h
+
+
 (* Axe gradué*)
-let draw_axes width height =
+let draw_axes width height color =
   let step_x = 100 in  (* pour l'axe X *)
   let step_y = 100 in   (*pour l'axe Y *)
-  set_color black;
+  set_color color;
 
   (* Axe X *)
   moveto 0 (height / 2);
@@ -291,8 +293,15 @@ let () =
        fill_rect 0 0 config.width config.height
    | None -> ());
 
-  (* Dessin des axes *)
-  draw_axes config.width config.height;
+(* Définir la couleur des axes en fonction de foreground_color *)
+let axis_color =
+  match config.foreground_color with
+  | Some c -> c
+  | None -> black  (* Couleur par défaut si foreground_color n'est pas spécifiée *)
+in
+
+(* Dessin des axes  *)
+draw_axes config.width config.height axis_color;
 
   (* Sélection du programme à exécuter *)
   let program =
