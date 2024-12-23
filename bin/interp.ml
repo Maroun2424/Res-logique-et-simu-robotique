@@ -89,6 +89,16 @@ let parse_args () =
     | arg :: _ -> failwith ("Argument inconnu ou mal forme : " ^ arg)
   in
   parse args default_config
+
+(* Dessin d'un rectangle (utilisé si -abs est spécifié) *)
+let draw_rectangle (rect : rectangle) color scaling_factor =
+  set_color color;
+  let x = int_of_float (rect.x_min *. scaling_factor) in
+  let y = int_of_float (rect.y_min *. scaling_factor) in
+  let w = int_of_float ((rect.x_max -. rect.x_min) *. scaling_factor) in
+  let h = int_of_float ((rect.y_max -. rect.y_min) *. scaling_factor) in
+  draw_rect x y w h
+
 let () =
   try loop 5
   with Quit -> close_graph ();;
