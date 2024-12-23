@@ -153,6 +153,12 @@ let rec string_of_instruction = function
 and string_of_program program =
   String.concat "; " (List.map string_of_instruction program)
 
+(* Transforme un point p en coordonnées pixel, centrées. *)
+let transform_point (p : point) width height scaling_factor =
+  let x = int_of_float (p.x *. scaling_factor) + (width / 2) in
+  let y = int_of_float (p.y *. scaling_factor) + (height / 2) in
+  (x, y)
+
 let () =
   try loop 5
   with Quit -> close_graph ();;
