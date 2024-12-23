@@ -17,20 +17,27 @@ let rec is_deterministic (prog : program) : bool =
       | Either _ -> false ) prog
   
 
-let rec unfold_repeat (prog : program) : program =
-  (* RQ : je n'ai pas utilisé is_deterministic car elle ajoute un parcours complet du program *)
-  List.flatten (List.map (fun instr -> match instr with (* On applatit la liste de listes d'instructions et on applique le pattern matching aux éléments *)
-    | Move _ -> [instr]  (* On garde l'instruction Move dans le nouveau prog *)
-    | Repeat (n , sousProg) ->
-        let rec repeat extractedList nb =  (* On ajoute les instructions dépliées du sousProg à extractedList en répétant nb fois*)
-            if nb = 0  then extractedList
-            else repeat (extractedList @ unfold_repeat sousProg) (nb - 1)
-        in repeat [] n
-    | Either (prog1, prog2) ->
-        let unfold1 = unfold_repeat prog1 in
-        let unfold2 = unfold_repeat prog2 in
-        unfold1 @ unfold2  (* On combine toutes les possibilités des deux branches *)
-  ) prog)
+(* Fonction auxiliaire pour déplier les répétitions *)
+let rec unfold_repeat_aux (prog : program ) ( acc : program ) : program =
+  match prog with
+  | [] -> List.rev acc (* Cas de base : on ret l'accumulateur inversé *)
+  | Move _ as instr :: rest ->
+      unfold_repeat_aux rest (instr :: acc) (* On ajoute l'instruction à l'accumulateur*)
+  | Repeat (n, sousProg) :: rest ->
+      let rec repeat n acc =
+        if n = 0 then acc (* Cas de base : on retourne l'accumulateur *)
+        else repeat (n - 1) (List.rev_append (unfold_repeat_aux sousProg []) acc) (* On répète le sous-programme n fois*)
+      in
+      unfold_repeat_aux rest (repeat n acc)
+  | Either (prog1, prog2) :: rest ->
+      let unfolded1 = unfold_repeat_aux prog1 [] in (* première branche *)
+      let unfolded2 = unfold_repeat_aux prog2 [] in (* deuxième branche *)
+      unfold_repeat_aux rest (List.rev_append unfolded1 (List.rev_append unfolded2 acc))
+
+      (*Doc : rev_append l1 l2 reverses l1 and concatenates it with l2. Equivalent to (List.rev l1) @ l2.*)
+
+let unfold_repeat (prog : program) : program =
+    unfold_repeat_aux prog [] (* récursion terminale *)
 
 let rec run_det (prog : program) (p : point) : point list =
   (* On génère la liste de toutes les positions visitées par le robot pendant l'exécution *)
