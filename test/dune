@@ -1,5 +1,5 @@
 (tests
-  (names test test_geo)
-  (libraries fmt alcotest pf5 )
+  (names test test_geo test_interp test_approx)
+  (libraries fmt alcotest pf5)
   (flags (:standard -open Pf5))
 )
